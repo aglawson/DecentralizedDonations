@@ -1,0 +1,25 @@
+{
+  "name": "decentralizeddonations",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aglawson/DecentralizedDonations.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aglawson/DecentralizedDonations/issues"
+  },
+  "homepage": "https://github.com/aglawson/DecentralizedDonations#readme",
+  "dependencies": {
+    "hardhat": "^2.12.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2"
+  }
+}
