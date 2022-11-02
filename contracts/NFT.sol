@@ -6,7 +6,7 @@ import "./ReentrancyGuard.sol";
 import "./MerkleProof.sol";
 import "./Percentages.sol";
 import "./Ownable.sol";
-contract BattleBunnies is ERC721A, Ownable, ReentrancyGuard, Percentages {
+contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     // Max supply 
     uint256 public maxSupply;
 
@@ -37,17 +37,14 @@ contract BattleBunnies is ERC721A, Ownable, ReentrancyGuard, Percentages {
         string memory symbol,   // 
         uint256 _maxSupply,     // 
         uint256 _price,         // 
-        uint256 _alPrice,       // 
-        uint256 _holderPrice    // 
-
+        uint256 _alPrice        //
     ) 
     ERC721A(name, symbol) 
     {
         maxSupply = _maxSupply;
         price = _price;
         alPrice = _alPrice;
-        holderPrice = _holderPrice;
-
+        
         // wallets.push(Wallets(35, 0x...));
         // wallets.push(Wallets(25, 0x...));
         // wallets.push(Wallets(15, 0x...));
