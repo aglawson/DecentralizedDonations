@@ -38,4 +38,14 @@ const { expect } = require("chai");
     });
     
   });
+
+  describe("Mint", async function () {
+    it('allows public mint for correct price', async function () {
+      await this.nft.setState(2);
+      expect(await this.nft.mint(1,[],{value: this.price})).to.emit('Transfer');
+      console.log(this.owner.address, this.addr2.address);
+    });
+
+
+  });
 });
