@@ -52,10 +52,9 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
 
         uint256 value = msg.value;
 
-        (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 90)}("");
+        (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 99)}("");
         require(success, "Transfer fail");
     }
-
 
     function withdraw() external onlyOwner {
         (bool success,) = payable(owner()).call{value: balanceOf(address(this))}("");
