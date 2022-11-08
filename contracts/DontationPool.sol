@@ -10,6 +10,7 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
     struct Entity {
         string name;
         address payable payReciever;
+        uint256 payout;
     }
     Entity[] public entities;
     mapping(string => uint256) public name_to_index;
@@ -17,9 +18,9 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
     
     uint256 public price;
 
-    constructor(string memory name, string memory symbol, uint256 _price) ERC721A(name, symbol) {
-        entities.push(Entity("NULL", payable(address(0))));
-        price = _price;
+    constructor() ERC721A("DecentDono", "DONO") {
+        entities.push(Entity("NULL", payable(address(0)), 0));
+        price = 1000000000000000;
     }
 
     function setPrice(uint256 _price) external onlyOwner {
@@ -35,7 +36,7 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
         require(!isInitialized(name), "Name already in use");
         require(!used_address[_payRecipient], "Address already in use");
         name_to_index[name] = entities.length;
-        entities.push(Entity(name, _payRecipient));
+        entities.push(Entity(name, _payRecipient, 0));
     }
 
     function removeEntity(string memory name) external onlyOwner {
@@ -51,13 +52,29 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
         require(isInitialized(name), "Entity does not exist");
 
         uint256 value = msg.value;
+        uint256 distribute = percentageOf(msg.value, 1);
 
         (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 99)}("");
         require(success, "Transfer fail");
+
+        for(uint i = 0; i < entities.length; i++) {
+            entities[i].payout += (distribute / entities.length);
+        }
     }
 
-    function withdraw() external onlyOwner {
+    function emergencyWithdraw() external onlyOwner {
         (bool success,) = payable(owner()).call{value: balanceOf(address(this))}("");
+        require(success, "Transfer fail");
+    }
+
+    function entityWithdraw(string memory name) external {
+        uint256 index = name_to_index[name];
+        require(entities[index].payReciever == _msgSender(), "Caller is not designated receiver for entity");
+
+        uint256 value = entities[index].payout;
+        entities[index].payout = 0;
+
+        (bool success,) = payable(entities[index].payReciever).call{value: value}("");
         require(success, "Transfer fail");
     }
 }
