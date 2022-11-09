@@ -15,7 +15,6 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
 
     uint256 public price;
     uint256 public alPrice;
-    uint256 public holderPrice;
 
     // 0 - closed
     // 1 - allow list only
@@ -100,10 +99,6 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
         require(_state <= 6, "State can only be from 0 to 6, inclusive");
         state = _state;
         emit stateChanged(state);
-    }
-
-    function setHolderPrice(uint256 _holderPrice) external onlyOwner {
-        holderPrice = _holderPrice;
     }
     
     function setALRoot(bytes32 root) external onlyOwner {

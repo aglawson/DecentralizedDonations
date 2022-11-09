@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/aglawson/DecentralizedDonations#readme",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "hardhat": "^2.12.0",
+    "hardhat-gas-reporter": "^1.0.9",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.3.0"
   },

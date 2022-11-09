@@ -41,6 +41,7 @@ const keccak256 = require("keccak256");
         it('distributes ETH', async function () {
             let entity = await this.dono.entities(1);
             expect(entity[2]).to.equal((await this.dono.price() * 0.01) / 2);
+            await this.dono.connect(this.pay1).entityWithdraw('entity1');
         });
     });
 
