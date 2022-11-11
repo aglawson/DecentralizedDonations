@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "./ERC721A.sol";
-import "./ReentrancyGuard.sol";
-import "./MerkleProof.sol";
-import "./Percentages.sol";
-import "./Ownable.sol";
+import "./utils/ERC721A.sol";
+import "./utils/ReentrancyGuard.sol";
+import "./utils/MerkleProof.sol";
+import "./utils/Percentages.sol";
+import "./utils/Ownable.sol";
 contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     // Max supply 
     uint256 public maxSupply;
