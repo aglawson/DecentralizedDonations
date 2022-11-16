@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: No License
 pragma solidity 0.8.17;
 
-import "./ERC721A.sol";
-import "./Percentages.sol";
-import "./Ownable.sol";
-import "./ReentrancyGuard.sol";
+import "./utils/ERC721A.sol";
+import "./utils/Percentages.sol";
+import "./utils/Ownable.sol";
+import "./utils/ReentrancyGuard.sol";
 
 contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
     struct Entity {
@@ -54,7 +54,7 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
         uint256 value = msg.value;
         uint256 distribute = percentageOf(msg.value, 1);
 
-        (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 99)}("");
+        (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 95)}("");
         require(success, "Transfer fail");
 
         for(uint i = 0; i < entities.length; i++) {
