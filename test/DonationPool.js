@@ -35,13 +35,20 @@ const keccak256 = require("keccak256");
         it('can mint', async function () {
             expect(await this.dono.connect(this.addr2).mint('entity1', 1, {value: await this.dono.price()})).to.emit('Transfer');
         });
+
+        it('minting while there are many entities', async function () {
+            for(let i = 1; i < 25; i++) {
+                await this.dono.addEntity(`entity${1+i}`, this.pay1.address);
+            }
+            expect(await this.dono.connect(this.addr2).mint('entity1', 1, {value: await this.dono.price()})).to.emit('Transfer');
+        });
     });
 
     describe("Distributing", async function () {
         it('distributes ETH', async function () {
             let entity = await this.dono.entities(1);
-            expect(entity[2]).to.equal((await this.dono.price() * 0.01) / 2);
-            await this.dono.connect(this.pay1).entityWithdraw('entity1');
+            console.log(entity[2]);
+            expect(await this.dono.connect(this.pay1).entityWithdraw('entity1')).to.emit('Withdraw');
         });
     });
 

@@ -7,6 +7,9 @@ import "./utils/Ownable.sol";
 import "./utils/ReentrancyGuard.sol";
 
 contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
+
+    event Withdraw(string entityName, uint256 amount);
+
     struct Entity {
         string name;
         address payable payReciever;
@@ -68,6 +71,8 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
 
         (bool success,) = payable(owner()).call{value: value}("");
         require(success, "Transfer fail");
+
+        emit Withdraw('OWNER', value);
     }
 
     function entityWithdraw(string memory name) external {
@@ -79,5 +84,7 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
 
         (bool success,) = payable(entities[index].payReciever).call{value: value}("");
         require(success, "Transfer fail");
+
+        emit Withdraw(name, value);
     }
 }
