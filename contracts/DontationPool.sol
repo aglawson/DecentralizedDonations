@@ -13,7 +13,7 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
     struct Entity {
         string name;
         address payable payReciever;
-        uint256 payout;
+        uint256 lastWithdraw;
     }
     Entity[] public entities;
     mapping(string => uint256) public name_to_index;
@@ -60,14 +60,23 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
         (bool success,) = entities[name_to_index[name]].payReciever.call{value: percentageOf(value, 95)}("");
         require(success, "Transfer fail");
 
-        for(uint i = 0; i < entities.length; i++) {
-            entities[i].payout += (distribute / entities.length);
-        }
+        // need to replace this logic
+        /**
+         * ideas: instead of writing to each entity's payout variable, allow each 
+         * entity to claim 1/entities.length once per 24 hourse (86400 seconds)
+         * pros: no crazy for loops for writing
+         * cons: disadvantage for users who don't remember to withdraw each day
+         */
+        // for(uint i = 0; i < entities.length; i++) {
+        //     entities[i].payout += (distribute / entities.length);
+        // }
+
     }
 
     function ownerWithdraw() external onlyOwner {
-        uint256 value = entities[0].payout;
-        entities[0].payout = 0;
+        require((block.timestamp - entities[0].lastWithdraw) > 86400, "Can only withdraw once per 24 hours");
+
+        uint256 value = address(this).balance / entities.length;
 
         (bool success,) = payable(owner()).call{value: value}("");
         require(success, "Transfer fail");
@@ -78,9 +87,10 @@ contract DonationPool is ERC721A, Ownable, Percentages, ReentrancyGuard {
     function entityWithdraw(string memory name) external {
         uint256 index = name_to_index[name];
         require(entities[index].payReciever == _msgSender(), "Caller is not designated receiver for entity");
+        require((block.timestamp - entities[index].lastWithdraw) > 86400, "Can only withdraw once per 24 hours");
+        entities[index].lastWithdraw = block.timestamp;
 
-        uint256 value = entities[index].payout;
-        entities[index].payout = 0;
+        uint256 value = address(this).balance / entities.length;
 
         (bool success,) = payable(entities[index].payReciever).call{value: value}("");
         require(success, "Transfer fail");
