@@ -31,14 +31,14 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     }
     Wallets[] public wallets;
 
-    constructor(
-        string memory name,     // 
-        string memory symbol,   // 
+    constructor (
+        string memory _name,     // 
+        string memory _symbol,   // 
         uint256 _maxSupply,     // 
         uint256 _price,         // 
         uint256 _alPrice        //
     ) 
-    ERC721A(name, symbol) 
+    ERC721A(_name, _symbol) 
     {
         maxSupply = _maxSupply;
         price = _price;
