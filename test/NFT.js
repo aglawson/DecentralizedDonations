@@ -102,10 +102,6 @@ const keccak256 = require("keccak256");
         await expect(this.nft.connect(this.addr2).setURI('test URI')).to.be.revertedWith('Ownable: caller is not the owner');
     });
 
-    it('does not allow non owner to set URI', async function () {
-        await expect(this.nft.connect(this.addr2).setURI('test URI')).to.be.revertedWith('Ownable: caller is not the owner');
-    });
-
     it('does not allow non owner to set state', async function () {
         await expect(this.nft.connect(this.addr2).setState(1)).to.be.revertedWith('Ownable: caller is not the owner');
     });
