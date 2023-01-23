@@ -23,7 +23,6 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     
     event minted(address minter, uint256 price, address recipient, uint256 amount);
     event stateChanged(uint256 _state);
-    event genesisChanged(address _project);
 
     struct Wallets {
         uint256 percentage;

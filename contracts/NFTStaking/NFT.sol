@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-import "./ERC721A.sol";
+import "./ERC721AStakeable.sol";
 import "./ReentrancyGuard.sol";
 import "./MerkleProof.sol";
 import "./Percentages.sol";
 import "./Ownable.sol";
-contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
+contract NFT is ERC721AStakeable, Ownable, ReentrancyGuard, Percentages {
     // Max supply 
     uint256 public maxSupply;
 
     // Merkle Root
-    bytes32 public alRoot;
+    bytes32 private alRoot;
 
     uint256 public price;
     uint256 public alPrice;
@@ -23,7 +23,6 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     
     event minted(address minter, uint256 price, address recipient, uint256 amount);
     event stateChanged(uint256 _state);
-    event genesisChanged(address _project);
 
     struct Wallets {
         uint256 percentage;
@@ -38,7 +37,7 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
         uint256 _price,         // 
         uint256 _alPrice        //
     ) 
-    ERC721A(_name, _symbol) 
+    ERC721AStakeable(_name, _symbol) 
     {
         maxSupply = _maxSupply;
         price = _price;

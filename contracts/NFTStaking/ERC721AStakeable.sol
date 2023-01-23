@@ -33,7 +33,10 @@ interface ERC721A__IERC721Receiver {
  * - An owner cannot have more than 2**64 - 1 (max value of uint64) of supply.
  * - The maximum token ID cannot exceed 2**256 - 1 (max value of uint256).
  */
-contract ERC721A is IERC721A {
+contract ERC721AStakeable is IERC721A {
+
+    event stakeStarted(uint256 tokenId, address staker);
+    event stakeEnded(uint256 tokenId, address staker, uint256 totalStakeTime);
 
     struct Stake {
         uint256 start;
@@ -41,9 +44,37 @@ contract ERC721A is IERC721A {
         address staker;
         bool active;
     }
-    mapping(uint256 => Stake) public tokenId_to_Stake;
+    mapping(uint256 => Stake) public token_to_stake;
 
-    
+    modifier tokenOwner(address sender, uint256 tokenId) {
+        require(ownerOf(tokenId) == sender, "Sender does not own token");
+        _;
+    }
+
+    function stake(uint256 tokenId) external tokenOwner(msg.sender, tokenId) {
+        token_to_stake[tokenId] = Stake(block.timestamp, tokenId, msg.sender, true);
+
+        emit stakeStarted(tokenId, msg.sender);
+    }
+
+    function endStake(uint256 tokenId) external tokenOwner(msg.sender, tokenId) {
+        require(token_to_stake[tokenId].active, "Token is not being staked");
+
+        uint256 totalStakeTime = stakeTime(tokenId);
+
+        token_to_stake[tokenId].active = false;
+
+        emit stakeEnded(tokenId, msg.sender, totalStakeTime);
+    }
+
+    function stakeTime(uint256 tokenId) public view returns(uint256) {
+        if(token_to_stake[tokenId].active) {
+            return block.timestamp - token_to_stake[tokenId].start;
+        }
+        return 0;
+    }
+
+
 
     // Bypass for a `--via-ir` bug (https://github.com/chiru-labs/ERC721A/pull/364).
     struct TokenApprovalRef {
