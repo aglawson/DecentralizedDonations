@@ -4,14 +4,14 @@ pragma solidity 0.8.9;
 import "./ERC1155.sol";
 import "../utils/Ownable.sol";
 
-contract Class3 is ERC1155, Ownable {
+contract Class303 is ERC1155, Ownable {
     event classCreated(string name, address admin, uint256 price, uint256 classId);
     event classBought(string name, address student, uint256 paid, uint256 classId);
 
     string public baseURI;
 
     modifier onlyClassAdmin(uint256 classId) {
-        require(_msgSender() == classes[classId].admin, "Class3: caller is not class admin");
+        require(_msgSender() == classes[classId].admin, "Class303: caller is not class admin");
         _;
     }
 
@@ -28,8 +28,9 @@ contract Class3 is ERC1155, Ownable {
         baseURI = _baseURI;
     }
 
-    function addClass(string memory name, uint256 price, string memory _uri) external {
-        require(price > 0, "Class3: price cannot be zero");
+    function addClass(string memory name, uint256 price) external {
+        require(price > 0, "Class303: price cannot be zero");
+
         uint256 classId = classes.length;
         classes.push(Class(name, _msgSender(), price, 0));
 
@@ -37,24 +38,40 @@ contract Class3 is ERC1155, Ownable {
     }
 
     function buyClass(uint256 classId) external payable {
-        require(classes[classId].admin != address(0), "Class3: class does not exist");
-        require(msg.value == classes[classId].price, "Class3: invalid value sent");
+        require(classes[classId].admin != address(0), "Class303: class does not exist");
+        require(msg.value == classes[classId].price, "Class303: invalid value sent");
+        require(balanceOf(_msgSender(), classId) == 0, "Class303: already enrolled");
 
-        _mint(_msgSender(), classId, 1, "");
+        classes[classId].count += 1;
+        uint256 fee = (msg.value / 100) * 10;
 
-        emit classBought(classes[classId].name, _msgSender(), msg.value, classId);
+        _mint(_msgSender(), classId, 1, bytes(classes[classId].name));
+        (bool success, ) = payable(classes[classId].admin).call{value: msg.value - fee}("");
+
+        require(success, "Class303: tranfser failed");
+
+        emit classBought(classes[classId].name, _msgSender(), msg.value - fee, classId);
     }
 
     function uri(uint256 classId) public view override returns(string memory) {
         return string(abi.encodePacked(baseURI, _toString(classId)));
     }
 
+    function setURI(string memory _uri) external onlyOwner {
+        baseURI = _uri;
+    }
+
     function changePrice(uint256 classId, uint256 price) external onlyClassAdmin(classId) {
-        require(price > 0, "Class3: price cannot be zero");
+        require(price > 0, "Class303: price cannot be zero");
         classes[classId].price = price;
     }
 
-        /**
+    function withdraw() external onlyOwner {
+        (bool success, ) = payable(owner()).call{value: address(this).balance}("");
+        require(success, "Class303: transfer failed");
+    }
+
+    /**
      * @dev Converts a uint256 to its ASCII string decimal representation.
      */
     function _toString(uint256 value) internal pure virtual returns (string memory str) {
