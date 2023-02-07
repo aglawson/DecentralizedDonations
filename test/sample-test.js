@@ -1,4 +1,3 @@
-const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const {MerkleTree} = require("merkletreejs");
 const keccak256 = require("keccak256");
@@ -31,7 +30,7 @@ const keccak256 = require("keccak256");
       this.alPrice = '5000000000000000';
 
       this.NFT = await ethers.getContractFactory("NFT");
-      this.nft = await this.NFT.deploy('Test NFT', 'TEST', 10000, '10000000000000000', '5000000000000000');
+      this.nft = await this.NFT.deploy('Test NFT', 'TEST', 10000, '10000000000000000', '5000000000000000', 'http://ipfs.io/ipfs/qwefowiejfoaiwejf');
     });
 
   describe("Deployment", function () {
@@ -92,34 +91,34 @@ const keccak256 = require("keccak256");
   describe('Security', async function () {
     it('does not allow non owner to call ownerMint', async function () {
         await expect(this.nft.connect(this.addr2).ownerMint(1,this.addr2.address)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    })
 
     it('does not allow non owner to withdraw', async function () {
         await expect(this.nft.connect(this.addr2).withdraw(1,this.addr2.address)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    })
 
-    it('does not allow non owner to set URI', async function () {
-        await expect(this.nft.connect(this.addr2).setURI('test URI')).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner/admin to set URI', async function () {
+        await expect(this.nft.connect(this.addr2).setURI('test URI')).to.be.revertedWith('OnlyAdmin: sender is not admin or owner');
+    })
 
-    it('does not allow non owner to set state', async function () {
-        await expect(this.nft.connect(this.addr2).setState(1)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner/admin to set state', async function () {
+        await expect(this.nft.connect(this.addr2).setState(1)).to.be.revertedWith('OnlyAdmin: sender is not admin or owner');
+    })
 
-    it('does not allow non owner to set alRoot', async function () {
-        await expect(this.nft.connect(this.addr2).setALRoot(this.root)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner/admin to set alRoot', async function () {
+        await expect(this.nft.connect(this.addr2).setALRoot(this.root)).to.be.revertedWith('OnlyAdmin: sender is not admin or owner');
+    })
 
-    it('does not allow non owner to call splitWithdraw', async function () {
-        await expect(this.nft.connect(this.addr2).splitWithdraw()).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner to transfer ownership', async function () {
+      await expect(this.nft.connect(this.addr4).transferOwnership(this.addr4.address)).to.be.revertedWith('Ownable: caller is not the owner');
+    })
 
-    it('does not allow non owner to change pay splits', async function () {
-        await expect(this.nft.connect(this.addr2).changePaySplits(0, 100, this.addr2.address)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner/admin to set price', async function () {
+      await expect(this.nft.connect(this.addr4).setPrice(0)).to.be.revertedWith('OnlyAdmin: sender is not admin or owner');
+    })
 
-    it('does not allow non owner to remove a pay split', async function () {
-        await expect(this.nft.connect(this.addr2).removeFromPaySplits(1)).to.be.revertedWith('Ownable: caller is not the owner');
-    });
+    it('does not allow non owner/admin to set allow list price', async function () {
+      await expect(this.nft.connect(this.addr4).setALPrice(0)).to.be.revertedWith('OnlyAdmin: sender is not admin or owner');
+    })
   });
 });

@@ -4,15 +4,23 @@ pragma solidity ^0.8.9;
 import "./utils/ERC721A.sol";
 import "./utils/ReentrancyGuard.sol";
 import "./utils/MerkleProof.sol";
-import "./utils/Percentages.sol";
 import "./utils/Ownable.sol";
-contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
+contract NFT is ERC721A, Ownable, ReentrancyGuard {
     // Max supply 
     uint256 public maxSupply;
+
+    // Admin mapping
+    mapping(address => bool) public isAdmin;
+    // Modifier to protect functions that should only be callable by admin or owner
+    modifier onlyAdmin() {
+        require(isAdmin[_msgSender()] || _msgSender() == owner(), "OnlyAdmin: sender is not admin or owner");
+        _;
+    }
 
     // Merkle Root
     bytes32 public alRoot;
 
+    // Public and Allow-List Prices
     uint256 public price;
     uint256 public alPrice;
 
@@ -24,32 +32,22 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
     event minted(address minter, uint256 price, address recipient, uint256 amount);
     event stateChanged(uint256 _state);
 
-    struct Wallets {
-        uint256 percentage;
-        address wallet;
-    }
-    Wallets[] public wallets;
-
     constructor (
         string memory _name,     // 
         string memory _symbol,   // 
         uint256 _maxSupply,     // 
         uint256 _price,         // 
-        uint256 _alPrice        //
+        uint256 _alPrice,        //
+        string memory _uri
     ) 
     ERC721A(_name, _symbol) 
     {
         maxSupply = _maxSupply;
         price = _price;
         alPrice = _alPrice;
-        
-        // wallets.push(Wallets(35, 0x...));
-        // wallets.push(Wallets(25, 0x...));
-        // wallets.push(Wallets(15, 0x...));
-        // wallets.push(Wallets(10, 0x...));
-        // wallets.push(Wallets(8, 0x...));
-        // wallets.push(Wallets(5, 0x...));
-        // wallets.push(Wallets(2, 0x...));
+        URI = _uri;
+
+        isAdmin[_msgSender()] = true;
     }
 
     function isAllowListed(address _recipient, bytes32[] calldata _merkleProof) public view returns(bool) {
@@ -90,42 +88,29 @@ contract NFT is ERC721A, Ownable, ReentrancyGuard, Percentages {
         require(success, "Transfer fail");
     }
 
-    function setURI(string memory _uri) external onlyOwner {
+    function setURI(string memory _uri) external onlyAdmin {
         URI = _uri;
     }
 
-    function setState(uint256 _state) external onlyOwner {
-        require(_state <= 6, "State can only be from 0 to 6, inclusive");
+    function setState(uint256 _state) external onlyAdmin {
+        require(_state <= 2, "State can only be from 0 to 2, inclusive");
         state = _state;
         emit stateChanged(state);
     }
     
-    function setALRoot(bytes32 root) external onlyOwner {
+    function setALRoot(bytes32 root) external onlyAdmin {
         alRoot = root;
     }
 
-    function splitWithdraw() external onlyOwner nonReentrant{
-        require(wallets.length > 0, "NFT: no wallets initialized for payment");
-        uint256 balance = address(this).balance;
-
-        for(uint256 i = 0; i < wallets.length; i++) {
-            uint256 payout = percentageOf(balance, wallets[i].percentage);
-            (bool success,) = wallets[i].wallet.call{value: payout }("");
-            require(success, 'Transfer fail');
-        }
+    function setAdmin(address _admin, bool _isAdmin) public onlyOwner {
+        isAdmin[_admin] = _isAdmin;
     }
 
-    function changePaySplits(uint256 indexToChange, uint256 _percentage, address payable _wallet) external onlyOwner {
-        wallets[indexToChange].percentage = _percentage;
-        wallets[indexToChange].wallet = _wallet;
+    function setPrice(uint256 _price) external onlyAdmin {
+        price = _price;
     }
 
-    function addToPaySplits(uint256 _percentage, address payable _wallet) external onlyOwner {
-        wallets.push(Wallets(_percentage, _wallet));
-    }
-
-    function removeFromPaySplits(uint256 index) external onlyOwner {
-        wallets[index] = wallets[wallets.length - 1];
-        wallets.pop();
+    function setALPrice(uint256 _alPrice) external onlyAdmin {
+        alPrice = _alPrice;
     }
 }
